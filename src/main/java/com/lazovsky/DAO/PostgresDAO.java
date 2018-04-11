@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 
@@ -77,15 +80,27 @@ public class PostgresDAO implements MP3Dao {
         List<MP3> list = new ArrayList<>();
 
         params.addValue("author", author);
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, params);
-        rows.forEach((row) -> {
-                    MP3 mp3 = new MP3();
-                    mp3.setId((Integer) row.get("id"));
-                    mp3.setName((String) row.get("name"));
-                    mp3.setAuthor((String) row.get("author"));
-                    list.add(mp3);
-                }
-        );
+        list = jdbcTemplate.query(sql, params, new MP3RowMapper());
+//        rows.forEach((row) -> {
+//                    MP3 mp3 = new MP3();
+//                    mp3.setId((Integer) row.get("id"));
+//                    mp3.setName((String) row.get("name"));
+//                    mp3.setAuthor((String) row.get("author"));
+//                    list.add(mp3);
+//                }
+//        );
         return list;
     }
+
+    private static final class MP3RowMapper implements RowMapper<MP3>{
+        @Override
+        public MP3 mapRow(ResultSet resultSet, int i) throws SQLException {
+            MP3 mp3 = new MP3();
+            mp3.setId(resultSet.getInt("id"));
+            mp3.setName(resultSet.getString("name"));
+            mp3.setName(resultSet.getString("author"));
+            return mp3;
+        }
+    }
+
 }
