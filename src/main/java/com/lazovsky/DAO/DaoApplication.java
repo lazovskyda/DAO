@@ -16,15 +16,15 @@ public class DaoApplication {
 		PostgresDAO connection = (PostgresDAO) context.getBean("postgresDAO");
 		MP3 myMP3 = (MP3) context.getBean("mp3");
 
-		myMP3.setName("Fuck yeah");
-		myMP3.setAuthor("ka303030");
+		myMP3.setName("Fuck yeah2222");
+		myMP3.setAuthor("ka303030222");
 
 
         testObject.test();
 
         //connection.setDataSource("");
-	//	connection.insert(myMP3);
-		connection.delete(myMP3);
+		connection.insert(myMP3);
+//		connection.delete(myMP3);
 
 		List<MP3> gettedList = new ArrayList<>();
 

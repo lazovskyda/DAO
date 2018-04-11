@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -15,50 +17,67 @@ import java.util.*;
 @Component
 public class PostgresDAO implements MP3Dao {
 
-    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
     @Override
     public void insert(MP3 mp3) {
-        String sql = "INSERT INTO \"MP3\" (name,author) VALUES (?,?)";
-        jdbcTemplate.update(sql, new Object[]{mp3.getName(), mp3.getAuthor()});
+//        String sql = "INSERT INTO \"MP3\" (name,author) VALUES (?,?)";
+//        jdbcTemplate.update(sql, new Object[]{mp3.getName(), mp3.getAuthor()});
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = "INSERT INTO \"MP3\" (name,author) VALUES (:name,:author)";
+        params.addValue("name", mp3.getName());
+        params.addValue("author", mp3.getAuthor());
+
+        jdbcTemplate.update(sql, params);
+
     }
 
     @Override
     public void delete(MP3 mp3) {
-        String sql = "DELETE FROM \"MP3\" WHERE(name = ?)";
-        jdbcTemplate.update(sql, mp3.getName());
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = "DELETE FROM \"MP3\" WHERE(name = :name)";
+        params.addValue("name", mp3.getName());
+        jdbcTemplate.update(sql, params);
     }
 
     @Override
     public MP3 getById(int id) {
-        String sql = "SELECT \"MP3\".id, \"MP3\".name, \"MP3\".author FROM \"MP3\" where (\"MP3\".id = ?)";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = "SELECT \"MP3\".id, \"MP3\".name, \"MP3\".author FROM \"MP3\" where (\"MP3\".id = :id)";
         MP3 mp3 = new MP3();
 
-        mp3 = (MP3) jdbcTemplate.queryForObject(sql, new Object[]{id}, new BeanPropertyRowMapper(MP3.class));
+        params.addValue("id", id);
+
+        mp3 = (MP3) jdbcTemplate.queryForObject(sql, params, new BeanPropertyRowMapper(MP3.class));
 
         return mp3;
     }
 
     @Override
     public List<MP3> getMP3ListByName(String name) {
-        String sql = "SELECT \"MP3\".id, \"MP3\".name, \"MP3\".author FROM \"MP3\" where (\"MP3\".name = ?)";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = "SELECT \"MP3\".id, \"MP3\".name, \"MP3\".author FROM \"MP3\" where (\"MP3\".name = :name)";
         List<MP3> list;
+        params.addValue("name", name);
 
-        list = jdbcTemplate.query(sql, new Object[]{name}, new BeanPropertyRowMapper(MP3.class));
+        list = jdbcTemplate.query(sql, params, new BeanPropertyRowMapper(MP3.class));
         return list;
     }
 
     @Override
     public List<MP3> getMP3ListByAuthor(String author) {
-        String sql = "SELECT \"MP3\".id, \"MP3\".name, \"MP3\".author FROM \"MP3\" where (\"MP3\".author = ?) order by \"MP3\".id desc";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = "SELECT \"MP3\".id, \"MP3\".name, \"MP3\".author FROM \"MP3\" where (\"MP3\".author = :author) order by \"MP3\".id desc";
         List<MP3> list = new ArrayList<>();
 
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, new Object[]{author});
+        params.addValue("author", author);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, params);
         rows.forEach((row) -> {
                     MP3 mp3 = new MP3();
                     mp3.setId((Integer) row.get("id"));
