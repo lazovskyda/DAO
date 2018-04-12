@@ -15,15 +15,30 @@ public class DaoApplication {
         TestClass testObject = (TestClass) context.getBean("testClass");
 		PostgresDAO connection = (PostgresDAO) context.getBean("postgresDAO");
 		MP3 myMP3 = (MP3) context.getBean("mp3");
+		MP3 myMP3_2 = (MP3) context.getBean("mp3");
+
+		List<MP3> myList = new ArrayList<MP3>();
+
 
 		myMP3.setName("Fuck yeah2222");
 		myMP3.setAuthor("ka303030222");
+
+		myMP3_2.setName("Second node name");
+		myMP3_2.setAuthor("Second author name");
+
+
+		myList.add(myMP3);
+		myList.add(myMP3_2);
 
 
         testObject.test();
 
         //connection.setDataSource("");
-		connection.insert(myMP3);
+		connection.insert(myMP3_2);
+
+		connection.batchInsert(myList);
+
+
 //		connection.delete(myMP3);
 
 		List<MP3> gettedList = new ArrayList<>();

@@ -11,6 +11,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 
@@ -31,16 +33,16 @@ public class PostgresDAO implements MP3Dao {
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-        this.insertMp3 = new SimpleJdbcInsert(dataSource).withTableName("\"MP3\"").usingColumns("name","author");
+        this.insertMp3 = new SimpleJdbcInsert(dataSource).withTableName("\"MP3\"").usingColumns("name", "author");
 
     }
 
     @Override
-    public void insert(MP3 mp3) throws BadSqlGrammarException{
+    public void insert(MP3 mp3) throws BadSqlGrammarException {
 //        String sql = "INSERT INTO \"MP3\" (name,author) VALUES (?,?)";
 //        jdbcTemplate.update(sql, new Object[]{mp3.getName(), mp3.getAuthor()});
 
-        try{
+        try {
             MapSqlParameterSource params = new MapSqlParameterSource();
 //            String sql = "INSERT INTO \"MP3\" (name,author) VALUES (:name,:author)";
 
@@ -52,13 +54,12 @@ public class PostgresDAO implements MP3Dao {
             insertMp3.execute(params);
 
 
-        }catch (BadSqlGrammarException ex){
+        } catch (BadSqlGrammarException ex) {
             ex.printStackTrace();
             System.err.println("something Wrong!!");
 
 
         }
-
 
 
     }
@@ -114,7 +115,19 @@ public class PostgresDAO implements MP3Dao {
         return list;
     }
 
-    private static final class MP3RowMapper implements RowMapper<MP3>{
+    public void batchInsert(List<MP3> listMP3) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = "INSERT INTO \"MP3\" (name,author) VALUES (:name,:author)";
+
+        SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(listMP3.toArray());
+
+       // params.addValue("name", mp3.getName());
+       // params.addValue("author", mp3.getAuthor());
+
+        jdbcTemplate.batchUpdate(sql, batch);
+    }
+
+    private static final class MP3RowMapper implements RowMapper<MP3> {
         @Override
         public MP3 mapRow(ResultSet resultSet, int i) throws SQLException {
             MP3 mp3 = new MP3();
