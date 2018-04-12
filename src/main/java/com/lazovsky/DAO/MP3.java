@@ -12,16 +12,16 @@ public class MP3 {
         return name;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getAuthor() {

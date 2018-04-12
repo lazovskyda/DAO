@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -21,12 +22,17 @@ import java.util.*;
 
 @Component
 public class PostgresDAO implements MP3Dao {
-
+    private SimpleJdbcInsert insertMp3;
     private NamedParameterJdbcTemplate jdbcTemplate;
+    private DataSource dataSource;
 
     @Autowired
+    @Qualifier("mp3Table")
     public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.insertMp3 = new SimpleJdbcInsert(dataSource).withTableName("\"MP3\"").usingColumns("name","author");
+
     }
 
     @Override
@@ -36,15 +42,18 @@ public class PostgresDAO implements MP3Dao {
 
         try{
             MapSqlParameterSource params = new MapSqlParameterSource();
-            String sql = "INSERT INTO \"MP3\" (name,author) VALUES (:name,:author)";
+//            String sql = "INSERT INTO \"MP3\" (name,author) VALUES (:name,:author)";
 
             params.addValue("name", mp3.getName());
             params.addValue("author", mp3.getAuthor());
 
-            jdbcTemplate.update(sql, params);
+//            jdbcTemplate.update(sql, params);
+
+            insertMp3.execute(params);
 
 
         }catch (BadSqlGrammarException ex){
+            ex.printStackTrace();
             System.err.println("something Wrong!!");
 
 
