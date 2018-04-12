@@ -1,9 +1,11 @@
 package com.lazovsky.DAO;
 
+import com.lazovsky.DAO.exceptions.MyException;
 import com.lazovsky.DAO.mappers.MP3Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -28,16 +30,27 @@ public class PostgresDAO implements MP3Dao {
     }
 
     @Override
-    public void insert(MP3 mp3) {
+    public void insert(MP3 mp3) throws BadSqlGrammarException{
 //        String sql = "INSERT INTO \"MP3\" (name,author) VALUES (?,?)";
 //        jdbcTemplate.update(sql, new Object[]{mp3.getName(), mp3.getAuthor()});
 
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        String sql = "INSERT INTO \"MP3\" (name,author) VALUES (:name,:author)";
-        params.addValue("name", mp3.getName());
-        params.addValue("author", mp3.getAuthor());
+        try{
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            String sql = "INSERT INTO \"MP3\" (name,author) VALUES (:name,:author)";
 
-        jdbcTemplate.update(sql, params);
+            params.addValue("name", mp3.getName());
+            params.addValue("author", mp3.getAuthor());
+
+            jdbcTemplate.update(sql, params);
+
+
+        }catch (BadSqlGrammarException ex){
+            System.err.println("something Wrong!!");
+
+
+        }
+
+
 
     }
 
