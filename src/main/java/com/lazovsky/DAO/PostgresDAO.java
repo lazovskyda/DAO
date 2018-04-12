@@ -85,6 +85,21 @@ public class PostgresDAO implements MP3Dao {
         return mp3;
     }
 
+
+    public MP3 getByName(String name) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        String sql = "SELECT \"MP3\".id, \"MP3\".name, \"MP3\".author FROM \"MP3\" where (\"MP3\".name = :name)";
+        MP3 mp3 = new MP3();
+
+        params.addValue("name", name);
+
+        mp3 = (MP3) jdbcTemplate.queryForObject(sql, params, new BeanPropertyRowMapper(MP3.class));
+
+        return mp3;
+    }
+
+
+
     @Override
     public List<MP3> getMP3ListByName(String name) {
         MapSqlParameterSource params = new MapSqlParameterSource();
