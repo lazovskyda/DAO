@@ -9,14 +9,15 @@
         http://www.liquibase.org/xml/ns/dbchangelog ">
 
     <changeSet id="1" author="ka30">
-        <createTable tableName="author">
-            <column name="id" type="int">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="name" type="varchar(50)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
+        <!--<createTable tableName="author">-->
+            <!--<column name="id" type="int">-->
+                <!--<constraints primaryKey="true" nullable="false"/>-->
+            <!--</column>-->
+            <!--<column name="name" type="varchar(50)">-->
+                <!--<constraints nullable="false"/>-->
+            <!--</column>-->
+        <!--</createTable>-->
+        <sql>create table author( id serial primary key, name varchar(200))</sql>
     </changeSet>
 
     <changeSet id="2" author="ka30">
@@ -24,11 +25,11 @@
     </changeSet>
 
     <changeSet id="3" author="ka30">
-        <sql>ALTER TABLE "MP3" ADD COLUMN author_id INTEGER REFERENCES test(id)</sql>
+        <sql>ALTER TABLE "MP3" ADD COLUMN author_id INTEGER REFERENCES author(id)</sql>
     </changeSet>
 
     <changeSet id="4" author="ka30">
-        <sql>update "MP3" set author_id = i.id from (select id, name from author) i where i.name = "MP3".author</sql>
+        <sqlFile path="migrations/SQL/updateAllAuthorId.sql"/>
     </changeSet>
 
     <changeSet id="5" author="ka30">
