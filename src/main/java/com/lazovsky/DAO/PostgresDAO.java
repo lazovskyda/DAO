@@ -46,7 +46,7 @@ public class PostgresDAO implements MP3Dao {
         Author author = new Author();
         author = getAuthorByName(mp3);
 
-        if(author == null){
+        if (author == null) {
             MapSqlParameterSource authorParams = new MapSqlParameterSource();
             String sql = "INSERT INTO Author (name) VALUES (:name)";
             authorParams.addValue("name", mp3.getAuthor().getName());
@@ -66,10 +66,10 @@ public class PostgresDAO implements MP3Dao {
     }
 
 
-    public Author getAuthorByName(MP3 mp3){
+    public Author getAuthorByName(MP3 mp3) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         Author author = new Author();
-        String sql = "select * from author where author.name = :author";
+        String sql = "SELECT * FROM author WHERE author.name = :author";
 
         params.addValue("author", mp3.getAuthor().getName());
         try {
@@ -78,7 +78,7 @@ public class PostgresDAO implements MP3Dao {
             System.out.println(author.getId());
             System.out.println(author.getName());
 
-        }catch (EmptyResultDataAccessException ex){
+        } catch (EmptyResultDataAccessException ex) {
             System.out.println("Don't have this author");
             ex.printStackTrace();
             author = null;
@@ -99,12 +99,12 @@ public class PostgresDAO implements MP3Dao {
     @Override
     public MP3 getById(int id) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        String sql = "SELECT \"MP3\".id, \"MP3\".name, author.id as author_id, author.name as author_name FROM \"MP3\" LEFT JOIN author on (\"MP3\".author_id = author.id) where (\"MP3\".id = :id)";
+        String sql = "SELECT \"MP3\".id, \"MP3\".name, author.id AS author_id, author.name AS author_name FROM \"MP3\" LEFT JOIN author ON (\"MP3\".author_id = author.id) WHERE (\"MP3\".id = :id)";
         MP3 mp3 = new MP3();
 
         params.addValue("id", id);
 
-        mp3 = (MP3) jdbcTemplate.queryForObject(sql, params, new  MP3RowMapper());
+        mp3 = (MP3) jdbcTemplate.queryForObject(sql, params, new MP3RowMapper());
 
         return mp3;
     }
@@ -112,16 +112,15 @@ public class PostgresDAO implements MP3Dao {
 
     public List<MP3> getByName(String name) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        String sql = "SELECT \"MP3\".id, \"MP3\".name, author.id as author_id, author.name as author_name FROM \"MP3\" LEFT JOIN author on (\"MP3\".author_id = author.id) where (\"MP3\".name = :name)";
+        String sql = "SELECT \"MP3\".id, \"MP3\".name, author.id AS author_id, author.name AS author_name FROM \"MP3\" LEFT JOIN author ON (\"MP3\".author_id = author.id) WHERE (\"MP3\".name = :name)";
         List<MP3> list;
 
         params.addValue("name", name);
 
-        list = jdbcTemplate.query(sql, params, new  MP3RowMapper());
+        list = jdbcTemplate.query(sql, params, new MP3RowMapper());
 
         return list;
     }
-
 
 
     @Override
@@ -131,14 +130,14 @@ public class PostgresDAO implements MP3Dao {
         List<MP3> list;
         params.addValue("name", name);
 
-        list = jdbcTemplate.query(sql, params, new  MP3RowMapper());
+        list = jdbcTemplate.query(sql, params, new MP3RowMapper());
         return list;
     }
 
     @Override
     public List<MP3> getMP3ListByAuthor(String author) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        String sql = "SELECT \"MP3\".id, \"MP3\".name, author.id AS author_id, author.name AS author_name FROM \"MP3\" LEFT JOIN author ON (\"MP3\".author_id = author.id) where (author.name = :author) order by \"MP3\".id desc";
+        String sql = "SELECT \"MP3\".id, \"MP3\".name, author.id AS author_id, author.name AS author_name FROM \"MP3\" LEFT JOIN author ON (\"MP3\".author_id = author.id) WHERE (author.name = :author) ORDER BY \"MP3\".id DESC";
         List<MP3> list = new ArrayList<>();
 
         params.addValue("author", author);
@@ -155,15 +154,32 @@ public class PostgresDAO implements MP3Dao {
     }
 
     public void batchInsert(List<MP3> listMP3) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        String sql = "INSERT INTO \"MP3\" (name,author) VALUES (:name,:author)";
 
-        SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(listMP3.toArray());
+        listMP3.forEach(
+                (mp3) -> {
+                    MapSqlParameterSource params = new MapSqlParameterSource();
 
-       // params.addValue("name", mp3.getName());
-       // params.addValue("author", mp3.getAuthor());
 
-        jdbcTemplate.batchUpdate(sql, batch);
+                    if (getAuthorByName(mp3) == null) {
+                        MapSqlParameterSource authorParams = new MapSqlParameterSource();
+                        String sql = "INSERT INTO author (name) VALUES (:name)";
+                        authorParams.addValue("name", mp3.getAuthor().getName());
+                        jdbcTemplate.update(sql, authorParams);
+
+                    }
+                    //author = getAuthorByName(mp3);
+                    mp3.setAuthor(getAuthorByName(mp3));
+
+                    String sql = "INSERT INTO \"MP3\" (name,author_id) VALUES (:name,:authorId)";
+
+                    params.addValue("name", mp3.getName());
+                    params.addValue("authorId", mp3.getAuthor().getId());
+
+                    jdbcTemplate.update(sql, params);
+
+                }
+        );
+
     }
 
     private static final class MP3RowMapper implements RowMapper<MP3> {

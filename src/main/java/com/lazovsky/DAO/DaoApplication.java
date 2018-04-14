@@ -45,18 +45,50 @@ public class DaoApplication {
 //		}
 
 
-		if(resultMP3 instanceof List){
-			resultMP3.forEach(
-					(mp3)->{
-						System.out.println("track------------------");
-						System.out.println(mp3.getName());
-						System.out.println(mp3.getId());
-						System.out.println(mp3.getAuthor().getId());
-						System.out.println(mp3.getAuthor().getName());
-					}
-			);
-		}
+//		if(resultMP3 instanceof List){
+//			resultMP3.forEach(
+//					(mp3)->{
+//						System.out.println("track------------------");
+//						System.out.println(mp3.getName());
+//						System.out.println(mp3.getId());
+//						System.out.println(mp3.getAuthor().getId());
+//						System.out.println(mp3.getAuthor().getName());
+//					}
+//			);
+//		}
+
+
+
+
+		List<MP3> testListIsert = new ArrayList<MP3>();
+		MP3 mp3_list1 = (MP3) context.getBean("mp3");
+		MP3 mp3_list2 = (MP3) context.getBean("mp3");
+
+		Author testAuthor1 = (Author) context.getBean("author");
+		Author testAuthor2 = (Author) context.getBean("author");
+
+		testAuthor1.setName("TestAuthor1");
+		testAuthor2.setName("TestAuthor2");
+
+		mp3_list1.setName("listTest_TrackName1");
+		mp3_list2.setName("listTest_TrackName2");
+		mp3_list1.setAuthor(testAuthor1);
+		mp3_list2.setAuthor(testAuthor2);
+
+		testListIsert.add(mp3_list1);
+		testListIsert.add(mp3_list2);
+
+		connection.batchInsert(testListIsert);
+
+
+
+
+
+
+
+
 /*
+
 
 		myMP3.setName("Fuck yeah2222");
 		myMP3.setAuthor("ka303030222");
