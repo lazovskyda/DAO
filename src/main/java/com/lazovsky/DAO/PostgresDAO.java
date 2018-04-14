@@ -15,6 +15,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -40,30 +42,32 @@ public class PostgresDAO implements MP3Dao {
 
     @Override
     public void insert(MP3 mp3) {
+        String sqlAuthor = "INSERT INTO Author (name) VALUES (:name)";
+        Author author = mp3.getAuthor();
 
         MapSqlParameterSource params = new MapSqlParameterSource();
 
-        Author author = new Author();
-        author = getAuthorByName(mp3);
+        params.addValue("name", author.getName());
 
-        if (author == null) {
-            MapSqlParameterSource authorParams = new MapSqlParameterSource();
-            String sql = "INSERT INTO Author (name) VALUES (:name)";
-            authorParams.addValue("name", mp3.getAuthor().getName());
-            jdbcTemplate.update(sql, authorParams);
-            author = getAuthorByName(mp3);
-        }
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        mp3.setAuthor(author);
 
-        String sql = "INSERT INTO \"MP3\" (name,author_id) VALUES (:name,:authorId)";
+        jdbcTemplate.update(sqlAuthor, params, keyHolder, new String[]{"id"});
+        int author_id = keyHolder.getKey().intValue();
 
+
+
+
+        String sqlMP3 = "INSERT INTO \"MP3\" (name,author_id) VALUES (:name,:authorId)";
+
+        params = new MapSqlParameterSource();
         params.addValue("name", mp3.getName());
-        params.addValue("authorId", mp3.getAuthor().getId());
-        jdbcTemplate.update(sql, params);
+        params.addValue("authorId", author_id);
+        jdbcTemplate.update(sqlMP3, params);
 
 
     }
+
 
 
     public Author getAuthorByName(MP3 mp3) {
