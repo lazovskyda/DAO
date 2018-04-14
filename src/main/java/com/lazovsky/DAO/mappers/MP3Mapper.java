@@ -12,7 +12,7 @@ public class MP3Mapper implements RowMapper {
         MP3 mp3 = new MP3();
         mp3.setId(rs.getInt("id"));
         mp3.setName(rs.getString("name"));
-        mp3.setAuthor(rs.getString("author"));
+        //mp3.setAuthor(rs.getString("author"));
         return mp3;
     }
 

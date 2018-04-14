@@ -1,12 +1,15 @@
 package com.lazovsky.DAO;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component("mp3")
+@Scope("prototype")
 public class MP3 {
     private int id;
     private String name;
-    private String author;
+
+    private Author author;
 
     public String getName() {
         return name;
@@ -24,11 +27,11 @@ public class MP3 {
         return id;
     }
 
-    public String getAuthor() {
+    public Author getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(Author author) {
         this.author = author;
     }
 }

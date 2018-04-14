@@ -15,10 +15,48 @@ public class DaoApplication {
         TestClass testObject = (TestClass) context.getBean("testClass");
 		PostgresDAO connection = (PostgresDAO) context.getBean("postgresDAO");
 		MP3 myMP3 = (MP3) context.getBean("mp3");
-		MP3 myMP3_2 = (MP3) context.getBean("mp3");
 
 		List<MP3> myList = new ArrayList<MP3>();
 
+
+
+		Author authorInit = (Author) context.getBean("author");
+		authorInit.setName("ka30");
+
+
+		myMP3.setName("zoombe");
+		myMP3.setAuthor(authorInit);
+
+
+		//connection.insert(myMP3);
+		//connection.delete(myMP3);
+
+		//connection.getById(4);
+		//Object resultMP3 = new Object();
+
+//		List<MP3> resultMP3 = connection.getByName("Second node name");
+		List<MP3> resultMP3 = connection.getMP3ListByAuthor("zemfira");
+
+//		if(resultMP3  instanceof MP3) {
+//			System.out.println(resultMP3.getName());
+//			System.out.println(resultMP3.getId());
+//			System.out.println(resultMP3.getAuthor().getId());
+//			System.out.println(resultMP3.getAuthor().getName());
+//		}
+
+
+		if(resultMP3 instanceof List){
+			resultMP3.forEach(
+					(mp3)->{
+						System.out.println("track------------------");
+						System.out.println(mp3.getName());
+						System.out.println(mp3.getId());
+						System.out.println(mp3.getAuthor().getId());
+						System.out.println(mp3.getAuthor().getName());
+					}
+			);
+		}
+/*
 
 		myMP3.setName("Fuck yeah2222");
 		myMP3.setAuthor("ka303030222");
@@ -60,6 +98,7 @@ public class DaoApplication {
 		System.out.println("ONE VALUE");
 		gettedMp3 = connection.getById(3);
 		System.out.print(gettedMp3.getId() +" "+ gettedMp3.getAuthor() +" "+ gettedMp3.getName());
+*/
 
 
 	}
