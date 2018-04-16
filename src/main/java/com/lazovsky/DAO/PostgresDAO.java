@@ -18,6 +18,9 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionTimedOutException;
+import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -69,37 +72,52 @@ public class PostgresDAO implements MP3Dao {
 
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, timeout = 1)
     public void insertMP3(MP3 mp3) {
 
         System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
-        int author_id = insertAuthor(mp3.getAuthor());
+        int author_id;
+        try{
+            author_id = insertAuthor(mp3.getAuthor());
+        }catch (TransactionTimedOutException ex){
+            System.out.println("ups");
+            author_id = 1;
+        }
+
 
         String sqlMP3 = "INSERT INTO \"MP3\" (name,author_id) VALUES (:name,:authorId)";
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("name", mp3.getName());
         params.addValue("authorId", author_id);
-        jdbcTemplate.update(sqlMP3, params);
 
+        try{
+            jdbcTemplate.update(sqlMP3, params);
+        }catch (TransactionTimedOutException ex){
+            System.out.println("ups time");
+        }
 
     }
+
     @Transactional(propagation = Propagation.REQUIRED)
     public int insertAuthor(Author author) {
         System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
 
         String sqlAuthor = "INSERT INTO Author (name) VALUES (:name)";
         //Author author = mp3.getAuthor();
-
+        try {
+            Thread.sleep(500);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("name", author.getName());
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(sqlAuthor, params, keyHolder, new String[]{"id"});
         int author_id = keyHolder.getKey().intValue();
-        return  author_id;
+        return author_id;
     }
-
 
 
     public Author getAuthorByName(MP3 mp3) {
