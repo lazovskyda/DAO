@@ -28,7 +28,7 @@ public class DaoApplication {
 		myMP3.setAuthor(authorInit);
 
 
-		connection.insert(myMP3);
+		connection.insertMP3(myMP3);
 		//connection.delete(myMP3);
 
 		//connection.getById(4);

@@ -18,8 +18,12 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.sql.DataSource;
+import java.beans.Transient;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -41,21 +45,18 @@ public class PostgresDAO implements MP3Dao {
     }
 
     @Override
+    @Transactional
     public void insert(MP3 mp3) {
         String sqlAuthor = "INSERT INTO Author (name) VALUES (:name)";
         Author author = mp3.getAuthor();
+        Object obj = new Object();
+
 
         MapSqlParameterSource params = new MapSqlParameterSource();
-
         params.addValue("name", author.getName());
-
         KeyHolder keyHolder = new GeneratedKeyHolder();
-
-
         jdbcTemplate.update(sqlAuthor, params, keyHolder, new String[]{"id"});
         int author_id = keyHolder.getKey().intValue();
-
-
 
 
         String sqlMP3 = "INSERT INTO \"MP3\" (name,author_id) VALUES (:name,:authorId)";
@@ -66,6 +67,37 @@ public class PostgresDAO implements MP3Dao {
         jdbcTemplate.update(sqlMP3, params);
 
 
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void insertMP3(MP3 mp3) {
+
+        System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
+        int author_id = insertAuthor(mp3.getAuthor());
+
+        String sqlMP3 = "INSERT INTO \"MP3\" (name,author_id) VALUES (:name,:authorId)";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("name", mp3.getName());
+        params.addValue("authorId", author_id);
+        jdbcTemplate.update(sqlMP3, params);
+
+
+    }
+    @Transactional(propagation = Propagation.REQUIRED)
+    public int insertAuthor(Author author) {
+        System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
+
+        String sqlAuthor = "INSERT INTO Author (name) VALUES (:name)";
+        //Author author = mp3.getAuthor();
+
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("name", author.getName());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(sqlAuthor, params, keyHolder, new String[]{"id"});
+        int author_id = keyHolder.getKey().intValue();
+        return  author_id;
     }
 
 
@@ -128,10 +160,12 @@ public class PostgresDAO implements MP3Dao {
 
 
     @Override
+    @Deprecated
     public List<MP3> getMP3ListByName(String name) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         String sql = "SELECT \"MP3\".id, \"MP3\".name, author.id AS author_id, author.name AS author_name FROM \"MP3\" LEFT JOIN author ON (\"MP3\".author_id = author.id) WHERE (\"MP3\".name = :name)";
         List<MP3> list;
+        Object obj = new Object();
         params.addValue("name", name);
 
         list = jdbcTemplate.query(sql, params, new MP3RowMapper());
