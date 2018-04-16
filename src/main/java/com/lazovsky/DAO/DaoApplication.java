@@ -3,11 +3,15 @@ package com.lazovsky.DAO;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootApplication
+//@Configuration
+@ImportResource("transactionContext.xml")
 public class DaoApplication {
 
 	public static void main(String[] args) {

@@ -72,7 +72,7 @@ public class PostgresDAO implements MP3Dao {
 
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, timeout = 1)
+   //@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, timeout = 1)
     public void insertMP3(MP3 mp3) {
 
         System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
@@ -99,7 +99,7 @@ public class PostgresDAO implements MP3Dao {
 
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    //@Transactional(propagation = Propagation.REQUIRED)
     public int insertAuthor(Author author) {
         System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
 
