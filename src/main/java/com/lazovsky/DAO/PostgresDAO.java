@@ -81,7 +81,7 @@ public class PostgresDAO implements MP3Dao {
     @TestAnnotation
     public void insertMP3(MP3 mp3) {
 
-        System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
+
         int author_id;
         try{
 
@@ -112,8 +112,6 @@ public class PostgresDAO implements MP3Dao {
     //@Transactional(propagation = Propagation.REQUIRED)
     @TestAnnotation
     public int insertAuthor(Author author) {
-        System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
-
         String sqlAuthor = "INSERT INTO Author (name) VALUES (:name)";
         //Author author = mp3.getAuthor();
         try {
