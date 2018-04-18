@@ -1,5 +1,6 @@
 package com.lazovsky.DAO;
 
+import com.lazovsky.DAO.Annotations.TestAnnotation;
 import com.lazovsky.DAO.exceptions.MyException;
 import com.lazovsky.DAO.mappers.MP3Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,10 @@ import java.util.*;
 
 @Component
 public class PostgresDAO implements MP3Dao {
+
+    @Autowired
+    private PostgresDAO postgresDAO;
+
     private SimpleJdbcInsert insertMp3;
     private NamedParameterJdbcTemplate jdbcTemplate;
     private DataSource dataSource;
@@ -73,12 +78,17 @@ public class PostgresDAO implements MP3Dao {
     }
 
    //@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, timeout = 1)
+    @TestAnnotation
     public void insertMP3(MP3 mp3) {
 
         System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
         int author_id;
         try{
-            author_id = insertAuthor(mp3.getAuthor());
+
+            //this is autoinjecting object this implementation for using transaction into transactoin
+            author_id = postgresDAO.insertAuthor(mp3.getAuthor());
+
+            //author_id = insertAuthor(mp3.getAuthor());
         }catch (TransactionTimedOutException ex){
             System.out.println("ups");
             author_id = 1;
@@ -100,6 +110,7 @@ public class PostgresDAO implements MP3Dao {
     }
 
     //@Transactional(propagation = Propagation.REQUIRED)
+    @TestAnnotation
     public int insertAuthor(Author author) {
         System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
 

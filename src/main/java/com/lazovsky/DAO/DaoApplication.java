@@ -33,6 +33,7 @@ public class DaoApplication {
 
 
 		connection.insertMP3(myMP3);
+	//	connection.insertAuthor(authorInit);
 		//connection.delete(myMP3);
 
 		//connection.getById(4);
